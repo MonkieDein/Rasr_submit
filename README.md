@@ -7,7 +7,7 @@ Set the directory to where the folder is located. For
 - main.R
 - Evaluator.R
 - RiskOfEval.R
-1. Line 3: setwd("~/<directory path>/Rasr_submit")
+1. Line 3: setwd("~/\<directory path\>/Rasr_submit")
 
 ## Prelim.R
 Installation of benchmark data is requred
