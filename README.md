@@ -1,5 +1,5 @@
 # Rasr_submit
-This repo is to store the clean rasr code for supplementary submission
+Rasr code for supplementary submission. All the results are run on Ubuntu 20.04, **8-core** Intel(R) Core(TM) i7-9700 CPU @ 3.00GHz, 32GB RAM. Note that, some library like **foreach** could require additional work for other OS like (Window 10), it requires manually adding the function to the memory on the slave processors.
 
 ## 0. Requirement
 Set the directory to where the folder is located. For 
@@ -8,6 +8,8 @@ Set the directory to where the folder is located. For
 - Evaluator.R
 - RiskOfEval.R
 1. Line 3: setwd("~/\<directory path\>/Rasr_submit")
+
+2. Make sure your R has all the libraries that is required. Use **install.packages("\<package_name\>")** to install missing packages.
 
 ## 1. Prelim.R
 Installation of benchmark data is required
