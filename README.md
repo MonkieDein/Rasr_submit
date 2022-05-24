@@ -22,9 +22,11 @@ Generate policy for **benchmark algorithms** that is not available in CRAAM
 - chow_cvar
 
 ## 3. Evaluator.R
-Generate sample instances and deploy policies.
+Generate sample instances with Monte Carlo methods and deploy policies.
 
-For reproducibility purposes we set an arbitrary seed (1), sample only 10,000 instances, and uses time horizon 500 for the experiment. In the main body of the paper, we use a random 100,000 instances and time horizon 1,000. Regardless, the trend and information of the solution are similar.
+- In the main body of the paper, we sample 100,000 instances and time horizon 1,000.
+- In the appendix, to reduce time consumption and for reproducibility purposes. We set an arbitrary seed (1), sample only 10,000 instances, and uses only time horizon 500 for the experiment.  
+- Note that: The distribution of the evaluation are similar both in the paper and in the appendix.
 
 ## RiskOfEval.R
 Calculate the Risk of Return of the evaluated sample instances.
