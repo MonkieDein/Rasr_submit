@@ -7,7 +7,7 @@ source("Code/Basic_Utils.R")
 TestFold = wdir(paste0(wdir("Eval/"),"test/"))
 
 domains = c("inventory","riverswim") # ,"population"
-
+for (domain in domains){
 if (!file.exists(paste0(TestFold,domain,"/evaluation.RData"))){
   stop("Evaluation file does not exist please run Evaluator.R")
 } else{
@@ -35,4 +35,5 @@ if (!file.exists(paste0(TestFold,domain,"/evaluation.RData"))){
     RiskofRewards[[ risk ]][[ alg ]][["EVaR"]] = EVAR(X,levels = L,risk = as.numeric(risk))
   }
 
+}
 }
