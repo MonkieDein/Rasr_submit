@@ -10,6 +10,12 @@ Rasr code for supplementary submission. All the results are run on Ubuntu 20.04,
 - main.R : Generate Policies beyond CRAAM benchmark algorithms.
 - Evaluator.R : Evaluate generated policies.
 - RiskOfEval.R : Calculate Risk of return given evaluated return distribution for each policy.
+2. In Eval/train/<domain>:
+CRAAMPolicies.RData : The policies of algorithm available in CRAAM. [row = risk levels, col = states]
+- Derman
+- RSVF
+- RSVI
+- BCR
 
 ## 0. Requirement
 Set the directory to where the folder is located. For 
