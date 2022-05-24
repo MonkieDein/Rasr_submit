@@ -68,10 +68,13 @@ PflugCVaR = function(MDP, lLl = 101, knots = NULL){
   n_iter = 0
   while (max(abs(V-Vnew)) > 1e-10){
     V = Vnew
+    registerDoParallel(cores=detectCores())
     # Solve Conditional CVaR for each action
     CVaR_out <- foreach (a = 1:MDP$lAl) %dopar% {
-                CondCVaR(V,knots,a,MDP$Pbar,MDP$Rbar,MDP$gamma,MDP$lSl,lLl)
+      CondCVaR(V,knots,a,MDP$Pbar,MDP$Rbar,MDP$gamma,MDP$lSl,lLl)
     }
+    registerDoParallel(cores=1)
+    stopImplicitCluster()
     V_list = lapply(1:MDP$lAl,function(a) CVaR_out[[a]][["Vnew"]])
     Vnew = Reduce(pmax,V_list)
     n_iter = n_iter + 1
