@@ -1,12 +1,12 @@
 # Set working directory as the main folder of the code
 # Change to your respective directory location
-setwd("~/Documents/GitHub/Rasr_submit")
+setwd("~/Desktop/GITHUB/Rasr_submit")
 rm(list=ls())
 source("Code/RASR_code.R")
 source("Code/PflugCVaR.R")
 
 # Domain put to test
-domains = c("riverswim","inventory") #  ,"population" : file too big cannot push to git.
+domains = c("riverswim","inventory","population") #  ,"population" : file too big cannot push to git.
 # Folders
 TrainFold = wdir(paste0(wdir("Eval/"),"train/"))
 
@@ -25,22 +25,32 @@ for (domain in domains){
   ERM_param = prep_ERM(MDP,alpha_0 = exp(10),epsilon = exp(-15)) 
   endPrep <- Sys.time()
   
+  cat(domain," ERM preparation completed in : ",endPrep - startPrep ,"\n")
+  
   startRasrErm <- Sys.time()
   RasrErmOut = RasrErm(MDP, ERM_param$rAlp, ERM_param$L) 
   endRasrErm <- Sys.time()
 
+  cat(domain," RASR completed in : ",endRasrErm - startRasrErm ,"\n")
+  
   startNaiveErm <- Sys.time()
   NaiveErmOut = NaiveErm(MDP , ERM_param$rAlp, ERM_param$L)
   endNaiveErm <- Sys.time()
 
+  cat(domain," Naive completed in : ",endNaiveErm - startNaiveErm ,"\n")
+  
   startEpisErm <- Sys.time()
   EpisErmOut = EpisErm(MDP, ERM_param$L)
   endEpisErm <- Sys.time()
 
+  cat(domain," Erik completed in : ",endEpisErm - startEpisErm ,"\n")
+  
   startPflugCVaR <- Sys.time()
   PflugCVaROut = PflugCVaR(MDP,lLl=101)
   endPflugCVaR <- Sys.time()
   
+  cat(domain," Chow completed in : ",endPflugCVaR - startPflugCVaR ,"\n")
+
   Timedf = data.frame(Task = c("ERMprep","RasrErm","NaiveErm","EpisErm","PflugCVaR"),
                      T_start = c(startPrep,startRasrErm,startNaiveErm,startEpisErm,startPflugCVaR),
                      T_end = c(endPrep,endRasrErm,endNaiveErm,endEpisErm,endPflugCVaR))

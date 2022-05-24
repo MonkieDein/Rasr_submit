@@ -1,2 +1,6 @@
 
 *.csv
+Eval/train/riverswim/Train.RData
+Eval/train/population/Train.RData
+Eval/train/inventory/Train.RData
+Eval/test/riverswim/evaluation.RData

@@ -1,6 +1,6 @@
 # Set working directory as the main folder of the code
 # Change to your respective directory location
-setwd("~/Documents/GitHub/Rasr_submit")
+setwd("~/Desktop/GITHUB/Rasr_submit")
 rm(list=ls())
 source("Code/RASR_code.R")
 source("Code/PflugCVaR.R")
@@ -10,7 +10,7 @@ library(foreach) # For parallel programming purposes
 library(doParallel)
 library(ggplot2)
 
-domains = c("riverswim","inventory") # ,"population" file too big cannot push to git.
+domains = c("riverswim","inventory","population" ) # file too big cannot push to git.
 algorithms = c("RASR","Naive","Erik","Derman","RSVF","BCR","RSVI","Chow")
 risks = c(0.99,0.95,0.9)
 # Folders
@@ -19,7 +19,7 @@ TestFold = wdir(paste0(wdir("Eval/"),"test/"))
 
 domain = "riverswim"
 
-
+eval_time = list()
 for (domain in domains){
   if (file.exists(paste0(TestFold,domain,"/evaluation.RData"))){
     load(file = paste0(TestFold,domain,"/evaluation.RData"))
@@ -93,7 +93,7 @@ for (domain in domains){
         pi = matrix(Policies[[alg]][which(abs(Policies$risk_levels-risk)<1e-10),],nrow=1)
       }
       registerDoParallel(cores=detectCores())
-      # If history dependent we need to solve it with a specific evaluator
+      # Chow is history dependent, we need to solve it with a history dependent evaluator
       TDR_D3U <- foreach (i= 1:n,.combine = 'c') %:% foreach (s0 = inits,.combine = 'c') %dopar% {
         EvalMarkovPi(i,s0,pi,MDP,saveFold,Time=t)
       }

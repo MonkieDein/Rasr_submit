@@ -1,12 +1,12 @@
 # Set working directory as the main folder of the code
 # Change to your respective directory location
-setwd("~/Documents/GitHub/Rasr_submit")
+setwd("~/Desktop/GITHUB/Rasr_submit")
 rm(list=ls())
 source("Code/Basic_Utils.R")
 
 TestFold = wdir(paste0(wdir("Eval/"),"test/"))
 
-domains = c("inventory","riverswim") # ,"population"
+domains = c("riverswim","inventory","population") # 
 for (domain in domains){
 if (!file.exists(paste0(TestFold,domain,"/evaluation.RData"))){
   stop("Evaluation file does not exist please run Evaluator.R")
@@ -34,6 +34,8 @@ if (!file.exists(paste0(TestFold,domain,"/evaluation.RData"))){
     RiskofRewards[[ risk ]][[ alg ]][["CVaR"]] = CVAR(X,beta = as.numeric(risk))
     RiskofRewards[[ risk ]][[ alg ]][["EVaR"]] = EVAR(X,levels = L,risk = as.numeric(risk))
   }
-
+  names(risks) = risks
+  RoR_df = lapply(risks, function(risk) t(sapply(algorithms,function(alg) RiskofRewards[[risk]][[alg]])))
+  save(RoR_df,file = paste0(TestFold,domain,"/RoR_df.RData"))
 }
 }
