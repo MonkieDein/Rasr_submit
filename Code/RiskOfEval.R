@@ -1,6 +1,7 @@
 # Set working directory as the main folder of the code
 # Change to your respective directory location
 setwd("~/Documents/GitHub/Rasr_submit")
+rm(list=ls())
 source("Code/Basic_Utils.R")
 
 TestFold = wdir(paste0(wdir("Eval/"),"test/"))
