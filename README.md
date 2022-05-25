@@ -51,6 +51,7 @@ Generate policy for **benchmark algorithms** that is not available in CRAAM
 | Naive      | 27         | 175          | 186         |
 | Erik       | 1117       | 110306       | 9977        |
 | Chow       | 69         | 861          | 572         |
+
 Time (secs) to compute [Ubuntu 20.04, **8-core** Intel(R) Core(TM) i7-9700 CPU @ 3.00GHz, 32GB RAM]
 
 ## 3. Evaluator.R
@@ -63,6 +64,7 @@ Generate sample instances with Monte Carlo methods and deploy policies.
 | Domain     | Riverswim  | Population   | Inventory   |
 | :--------- | ---------: | -----------: | ----------: |
 | Time       | 2555       | 11021        | 2935        |
+
 Time (secs) to compute [Ubuntu 20.04, **8-core** Intel(R) Core(TM) i7-9700 CPU @ 3.00GHz, 32GB RAM]
 
 
