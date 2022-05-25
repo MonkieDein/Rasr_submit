@@ -15,7 +15,7 @@ if (!file.exists(paste0(TestFold,domain,"/evaluation.RData"))){
   
   L = sapply(0:4000,function(l) exp(20)*0.99^l)
   AlgRisk = lapply(strsplit(names(evaluation),"-"),function(vec) vec)
-  risks = as.numeric(unique(sapply(AlgRisk,function(vec) vec[2])))
+  risks = unique(sapply(AlgRisk,function(vec) vec[2]))
   algorithms = unique(sapply(AlgRisk,function(vec) vec[1]))
   
   # Risk of Reward [[risk]] [[algorithm]] [[measure]]
@@ -30,7 +30,7 @@ if (!file.exists(paste0(TestFold,domain,"/evaluation.RData"))){
     X = evaluation[[paste(AlgRisk[[i]],collapse="-")]]
     
     RiskofRewards[[ risk ]][[ alg ]] = list()
-    RiskofRewards[[ risk ]][[ alg ]][["VaR"]] = quantile(X,1-as.numeric(risk))
+    RiskofRewards[[ risk ]][[ alg ]][["VaR"]] = quantile(X,1-as.numeric(risk),name=FALSE)
     RiskofRewards[[ risk ]][[ alg ]][["CVaR"]] = CVAR(X,beta = as.numeric(risk))
     RiskofRewards[[ risk ]][[ alg ]][["EVaR"]] = EVAR(X,levels = L,risk = as.numeric(risk))
   }

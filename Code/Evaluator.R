@@ -17,17 +17,19 @@ risks = c(0.99,0.95,0.9)
 TrainFold = wdir(paste0(wdir("Eval/"),"train/"))
 TestFold = wdir(paste0(wdir("Eval/"),"test/"))
 
-domain = "riverswim"
+# domain = "riverswim"
 
-eval_time = list()
+startTime = list()
+endTime = list()
 for (domain in domains){
+  startTime[[domain]] <- Sys.time()
   if (file.exists(paste0(TestFold,domain,"/evaluation.RData"))){
     load(file = paste0(TestFold,domain,"/evaluation.RData"))
   } else{
     evaluation = list()
   }
   
-  cat("Evaluating",domain,"evaluator")
+  cat("Evaluating",domain,"evaluator\n")
 
   loadFold = wdir(paste0(TrainFold,domain,"/"))
   # Get Solved policy
@@ -63,7 +65,7 @@ for (domain in domains){
   
   # Algorithm preprocess for policy
   for (alg in algorithms){
-    cat("Evaluating",alg,domain,"evaluator")
+    cat("Evaluating",alg,domain,"evaluator\n")
     
     if (!is.null(evaluation[[paste0(alg,"-",risk)]])){
       next
@@ -104,10 +106,13 @@ for (domain in domains){
   }
 }
   save(evaluation,file = paste0(TestFold,domain,"/evaluation.RData"))
+  endTime[[domain]] <- Sys.time()
 }
 
+totalTime = unlist(endTime)-unlist(startTime)
+names(totalTime) = domains
 
-
+write.csv(totalTime,paste0(TestFold,"evalTime.csv"))
 
 
 

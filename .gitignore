@@ -4,3 +4,17 @@ Eval/train/riverswim/Train.RData
 Eval/train/population/Train.RData
 Eval/train/inventory/Train.RData
 Eval/test/riverswim/evaluation.RData
+Eval/test/boxplot/inventory/90confident.pdf
+Eval/test/boxplot/inventory/95confident.pdf
+Eval/test/boxplot/inventory/99confident.pdf
+Eval/test/boxplot/population/90confident.pdf
+Eval/test/boxplot/population/95confident.pdf
+Eval/test/boxplot/population/99confident.pdf
+Eval/test/boxplot/riverswim/90confident.pdf
+Eval/test/boxplot/riverswim/95confident.pdf
+Eval/test/boxplot/riverswim/99confident.pdf
+Eval/test/inventory/evaluation.RData
+Eval/test/inventory/RoR_df.RData
+Eval/test/population/evaluation.RData
+Eval/test/population/RoR_df.RData
+Eval/test/riverswim/RoR_df.RData
