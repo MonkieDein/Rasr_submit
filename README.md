@@ -45,12 +45,26 @@ Generate policy for **benchmark algorithms** that is not available in CRAAM
 - epis_erm
 - chow_cvar
 
+Time (secs) to compute [Ubuntu 20.04, **8-core** Intel(R) Core(TM) i7-9700 CPU @ 3.00GHz, 32GB RAM]
+| Methods    | Riverswim  | Population   | Inventory   |
+| :--------- | ---------: | -----------: | ----------: |
+| RASR       | <2         | 24           | <7          |
+| Naive      | 27         | 175          | 186         |
+| Erik       | 1117       | 110306       | 9977        |
+| Chow       | 69         | 861          | 572         |
+
 ## 3. Evaluator.R
 Generate sample instances with Monte Carlo methods and deploy policies.
 
 - In the main body of the paper, we sample 100,000 instances and time horizon 1,000.
 - In the appendix, to reduce time consumption and for reproducibility purposes. We set an arbitrary seed (1), sample only 10,000 instances, and uses only time horizon 500 for the experiment.  
 - Note that: The distribution of the evaluation are similar both in the paper and in the appendix.
+
+Time (secs) to compute [Ubuntu 20.04, **8-core** Intel(R) Core(TM) i7-9700 CPU @ 3.00GHz, 32GB RAM]
+| Domain     | Riverswim  | Population   | Inventory   |
+| :--------- | ---------: | -----------: | ----------: |
+| Time       | 2555       | 11021        | 2935        |
+
 
 ## 4. RiskOfEval.R
 Calculate the Risk of Return of the evaluated sample instances.
