@@ -24,12 +24,17 @@ CRAAMPolicies.RData : The policies of algorithm available in CRAAM. [row = risk 
 - BCR
 
 ## 0. Requirement
-Set the directory to where the folder is located. For 
+0. [Install Rgui and Rstudio](https://rstudio-education.github.io/hopr/starting.html)
+
+1. Line 3: setwd("~/\<directory path\>/Rasr_submit")
+Set the directory to where the folder is located. For :
 - Prelim.R
 - main.R
 - Evaluator.R
 - RiskOfEval.R
-1. Line 3: setwd("~/\<directory path\>/Rasr_submit")
+- Barplot.R 
+- Table.R 
+- Histogram.R
 
 2. Make sure your R has all the libraries that is required. Use **install.packages("\<package_name\>")** to install missing packages.
 
