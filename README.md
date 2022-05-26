@@ -78,5 +78,10 @@ Calculate the Risk of Return of the evaluated sample instances.
 
 ## 5. Generate Plots and Tables
 - Barplot.R : Generate Barplot given RiskOfReward
-- Table.R : Generate Computation time table and RiskOfReward table
 - Histogram.R : Generate Histogram shows distribution of riskAverse algorithm vs NominalMDP
+- Table.R : Generate Computation time table and RiskOfReward table
+The packages kableExtra might require more work to install. In terminal try install the following
+  - sudo apt-get install libcurl4-openssl-dev
+  - sudo apt install libfontconfig1-dev
+  - [sudo apt-get install libxml2 libxml2-dev](https://stackoverflow.com/questions/31797524/r-devtools-fails-as-package-libxml-2-0-was-not-found-in-the-pkg-config-search-p)
+    
