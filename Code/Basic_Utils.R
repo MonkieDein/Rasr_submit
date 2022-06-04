@@ -80,22 +80,11 @@ TDR = function(V, discount=0.9){
   return(sum(D * V))
 }
 
-# CVAR = function(X,beta=0.95){
-#   X = sort(X)
-#   theta = 1-beta
-#   n = length(X)
-#   portion = theta*n
-#   return((mean(X[1:ceiling(portion)]) - X[ceiling(portion)])*(ceiling(portion)/portion) + X[ceiling(portion)] )
-# }
-
 EVAR = function(X,levels,risk=0.95, prob=NULL){
   return(max(sapply(levels, function(z) ERM(X,alpha = z,prob = prob) + log(1-risk)/z )))
 }
-# Beta here is used as confident level, theta is used as significant level
-CVAR = function(X,beta=0.95,prob = NULL){
-  ord = order(X)
-  X = X[ord]
-  theta = 1-beta
+# Theta is used as significant level, theta = 0 equivalent to minimum, theta = 1 equivalent to average
+CVAR = function(X,thetas = 0.05,prob = NULL){
   n = length(X)
   if (is.null(prob)){
     prob = rep(1/n,n)
@@ -104,20 +93,36 @@ CVAR = function(X,beta=0.95,prob = NULL){
   } else if (abs(sum(prob) - 1) > 1e-8){
     stop("Distribution probability does not sum to one (1)")
   }
+  # sort value and its probability
+  ord = order(X)
+  X = X[ord]
   prob = prob[ord]
-  leftover = theta
-  index = 1
-  while (index < n){
-    if (leftover - prob[index] < 0){
-      prob[index] = leftover
-      return(sum(prob[1:index]*X[1:index])/theta)
-    }
-    leftover = leftover - prob[index]
-    index = index + 1
-  }
-  prob[index] = leftover
+
+  # force thetas to be a vector
+  thetas = c(thetas)
+  lLl = length(thetas)
+  v = thetas*0
+  names(v) = thetas
   
-  return(sum(prob*X)/theta)
+  # Initialize parameter for loop
+  Psum = 0 
+  Vsum = 0
+  index = 1
+  
+  for (l in 1:lLl){
+    k = thetas[l]
+    if (k == 0){
+      v[l] = min(X[prob>0])
+    } else {
+      while (k > (Psum + prob[index] +1e-10) ){
+        Psum = (Psum + prob[index])
+        Vsum = Vsum + prob[index]*X[index]
+        index = index + 1
+      }
+      v[l] = (Vsum + (k-Psum)*X[index])/k  # This is Piecewise Linear
+    }
+  }
+  return(v)
 }
 
 wdir = function(directory_name){
@@ -175,32 +180,9 @@ EvalMarkovPi = function(i,s0,Pi,MDP,folder_name,Time = NULL){
   return(TDR)
 }
 
-# This EvalHistPi require the whole Augmented Transition Models to be passed in
-# This method is infeasible for large tabular domain like population since augmenting 
-# all the Transition Models require 200GB of RAM to store it in Memory.
-EvalHistPi = function(i,s0,Pi,MDP,folder_name,P_Aug , S_Aug,Time = NULL){
-  cur_df = read.csv(paste0(folder_name,"/instance_",i,".csv"))
-  if (is.null(Time)){Time = nrow(cur_df)} # Sample Time Horizon
-  lLl = nrow(Pi)      # Risk Levels Depth
-  TDR = 0
-  gamma_T = 1
-  # Cur_s and s_next is a reference to the augmented States
-  cur_s = s0 
-  # s_ori,s_new and l_ori,l_new refer to the initial state and level correspond the the augment state
-  for (t in 1:Time){
-    c(s_ori,l_ori) %<-% as.numeric(unlist(str_split(S_Aug[cur_s],"-")))
-    s_next = drawS_(P_Aug[[cur_df$T_outcome[t]]][cur_s,],choice = cur_df$S_[t])
-    c(s_new,l_new) %<-% as.numeric(unlist(str_split(S_Aug[s_next],"-")))
-    TDR = TDR + gamma_T*MDP$R[[cur_df$R_outcome[t]]][s_ori,Pi[l_ori , s_ori],s_new]
-    gamma_T = MDP$gamma*gamma_T
-    cur_s = s_next
-  }
-  TDR = TDR/(1-gamma_T)
-  return(TDR)
-}
-# This EvalHistPi2 does not require whole Augmenting Transition Model to be passed in
+# This EvalHistPi does not require whole Augmenting Transition Model to be passed in
 # In every time step it solve for the transition independently
-EvalHistPi2 = function(i,s0,Pi,MDP,folder_name, S_Aug,S_map,T_cnt,Time = NULL){
+EvalHistPi = function(i,s0,Pi,MDP,folder_name, S_Aug,S_map,T_cnt,Time = NULL){
   cur_df = read.csv(paste0(folder_name,"/instance_",i,".csv"))
   if (is.null(Time)){Time = nrow(cur_df)} # Sample Time Horizon
   lLl = nrow(Pi)      # Risk Levels Depth

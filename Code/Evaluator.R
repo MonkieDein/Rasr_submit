@@ -76,7 +76,7 @@ for (domain in domains){
       # If history dependent we need to solve it with a specific evaluator
       TDR_D3U <- foreach (i= 1:n,.combine = 'c') %:% foreach (s0 = inits,.combine = 'c') %dopar% {
         # s0_aug = Extra$Aug$S_map[[paste(s0,which.min(abs(theta - PflugCVaROut$L)),sep="-")]]
-        EvalHistPi2(i,Extra$Aug$S_map[[paste(s0,which.min(abs(theta - PflugCVaROut$L)),sep="-")]],
+        EvalHistPi(i,Extra$Aug$S_map[[paste(s0,which.min(abs(theta - PflugCVaROut$L)),sep="-")]],
                     PflugCVaROut$Pi,MDP,saveFold, Extra$Aug$S, Extra$Aug$S_map,PflugCVaROut$T_cnt,Time=t)
       }
       registerDoParallel(cores=1)
