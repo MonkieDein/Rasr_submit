@@ -72,17 +72,22 @@ ERM = function(X, alpha=0.9, prob = NULL){
   }
   return(-(C+log(mean(exp(Y-C))))/alpha)
 }
-# Total Discounted Return (Cost)
-# TDR take in vector of returns V[t=0,t=1,...] and discount factor 
-# Calculated the total discounted return
-TDR = function(V, discount=0.9){
-  D = sapply(1:length(V),function(t) discount^(t-1))
-  return(sum(D * V))
-}
 
 EVAR = function(X,levels,risk=0.95, prob=NULL){
   return(max(sapply(levels, function(z) ERM(X,alpha = z,prob = prob) + log(1-risk)/z )))
 }
+
+
+# Which.Erm2Evar takes a vector of Scores for Erm (Eta), their respective alphas (L) and a confident level (beta)
+# that is comparable to VaR and CVaR. Erm2Evar return the optimal index of the optimal alpha in L.
+which.Erm2Evar = function(L, Eta, beta = 0.9){
+  if (length(Eta) != length(L)){
+    warning("Risk and return dimension does not match.")
+  }
+  return( which.max( Eta + log(1-beta)/L ) )
+}
+
+
 # Theta is used as significant level, theta = 0 equivalent to minimum, theta = 1 equivalent to average
 CVAR = function(X,thetas = 0.05,prob = NULL){
   n = length(X)
@@ -93,6 +98,7 @@ CVAR = function(X,thetas = 0.05,prob = NULL){
   } else if (abs(sum(prob) - 1) > 1e-8){
     stop("Distribution probability does not sum to one (1)")
   }
+  
   # sort value and its probability
   ord = order(X)
   X = X[ord]
@@ -100,6 +106,9 @@ CVAR = function(X,thetas = 0.05,prob = NULL){
 
   # force thetas to be a vector
   thetas = c(thetas)
+  if (max(thetas)>1 || min(thetas)<0){
+    stop("Undefined confident level. (thetas) should be an array between 0 and 1.")
+  }
   lLl = length(thetas)
   v = thetas*0
   names(v) = thetas
@@ -123,6 +132,14 @@ CVAR = function(X,thetas = 0.05,prob = NULL){
     }
   }
   return(v)
+}
+
+# Total Discounted Return (Cost)
+# TDR take in vector of returns V[t=0,t=1,...] and discount factor 
+# Calculated the total discounted return
+TDR = function(V, discount=0.9){
+  D = sapply(1:length(V),function(t) discount^(t-1))
+  return(sum(D * V))
 }
 
 wdir = function(directory_name){
@@ -159,6 +176,7 @@ drawS_ = function(weights,choice){
     }
     choiceIndex = choiceIndex + 1
   }
+  return(choiceIndex)
 }
 
 # For Stationary Policy please pass in Pi as matrix(Pi,nrow = 1)

@@ -110,12 +110,3 @@ EpisErm = function(MDP, levels, Pi = NULL){
   return(ErmMat2List(statistics , levels , MDP$S , MDP$lSl))
 }
 
-# Which.Erm2Evar takes a vector of Scores for Erm (Eta), their respective alphas (L) and a confident level (beta)
-# that is comparable to VaR and CVaR. Erm2Evar return the optimal index of the optimal alpha in L.
-which.Erm2Evar = function(L, Eta, beta = 0.9){
-  if (length(Eta) != length(L)){
-    warning("Risk and return dimension does not match.")
-  }
-  return( which.max( Eta + log(1-beta)/L ) )
-}
-
