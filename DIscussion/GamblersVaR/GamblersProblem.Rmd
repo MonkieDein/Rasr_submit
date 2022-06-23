@@ -1,0 +1,53 @@
+---
+title: "Gambers Vs VaR"
+author: "Monkie"
+date: "6/23/2022"
+output: pdf_document
+---
+
+# The gambler's problem (RL Sutton Barto)
+
+A gambler has the opportunity to make bets on the outcomes of a sequence of coin flips. If the coin comes up heads, he wins as many dollars as he staked on that flip; if it is tails, he loses his stake. The game ends when the gambler wins by reaching his goal of \$100, or loses by running out of money. On each flip, the gambler must decide what portion of his capital to stake, an integer numbers of dollars. This problem can be formulated as an undiscounted episodic finite MDP. The state is the gambler's capital, $s \in \{0,1,2,...,100\}$ and the actions are stakes, $a \in \{0,1,...,s\}$. The reward is zero on all transitions except those on which the gambler reaches his goal it is +1. The state value function then gives the probability of winning from each state. A policy is a mapping from levels of capital to stakes. The optimal policy maximizes the probability of reaching the goal. Let $p_h$ denote the probability of the coin coming up heads. If $p_h$ is known, then the entire problem is known and it can be solved, for instance, by value iteration. Let consider an example where the $p_h = 0.4$.
+
+```{r setup, include=FALSE}
+S = 1:100
+A = 1:100
+R = c(rep(0,99),1)
+V = R*0
+P = array(data=0,dim=c(length(S),length(A),length(S)),dimnames = list(S,A,S))
+ph = 0.4
+
+for (s in S){
+  for (a in A){
+    if (s>=a){
+      if (s+a <= 100){
+        P[s,a,s+a]=ph
+        if (s-a > 0){
+          P[s,a,s-a]=1-ph
+        }
+      }
+    }
+  }
+}
+```
+
+Value iteration
+```{r}
+for (iter in 1:100){
+  Pi = R*0+1
+  V_old = V
+  for (s in S){
+    Pi[s] = which.max(sapply(A,function(a) R[s] + sum(P[s,a,]*V_old) )) 
+  
+    V[s] = max(sapply(A,function(a) R[s] + sum(P[s,a,]*V_old) )) 
+  }
+}
+
+Pi
+V
+plot(S,Pi,type="s")
+```
+
+
+
+

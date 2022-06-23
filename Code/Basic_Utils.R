@@ -179,6 +179,14 @@ drawS_ = function(weights,choice){
   return(choiceIndex)
 }
 
+VAR = function(X,theta = 0.05,prob = NULL){
+  # sort value and its probability
+  ord = order(X)
+  X = X[ord]
+  prob = prob[ord]
+  return(X[drawS_(prob,theta)])
+}
+
 # For Stationary Policy please pass in Pi as matrix(Pi,nrow = 1)
 EvalMarkovPi = function(i,s0,Pi,MDP,folder_name,Time = NULL){
   cur_df = read.csv(paste0(folder_name,"/instance_",i,".csv"))

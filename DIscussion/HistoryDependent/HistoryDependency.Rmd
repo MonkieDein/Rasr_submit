@@ -1,0 +1,75 @@
+---
+title: "History Dependency"
+author: "Monkie"
+date: "6/22/2022"
+output:
+  pdf_document: default
+header-includes:
+- \usepackage{bbm}
+- \usepackage{amsmath}
+---
+
+```{r,include=FALSE}
+rm(list = ls(all.names = TRUE))
+setwd("~/Desktop/GITHUB/Rasr_submit")
+source("Code/Basic_Utils.R")
+```
+
+We consider MDP with objective 
+$$
+\max_\pi \rho[\sum_t \gamma^t R_t^\pi]
+$$
+
+where $\rho$ refers to risk measure of interest. It is well known for $\rho = \mathbb{E}$ in finite horizon the optimal policy is time dependent deterministic, and is determistic in infinite horizon. In this document, we will provide a simple example to show that when $\rho = \operatorname{VaR}$ or $\rho = \operatorname{CVaR}$ the optimal policy is history dependent. Let the discount factor $\gamma = 1$ for this example.
+
+![MDP Tree](ActionTree.pdf){width=500px}
+
+For expectation, given MDP tree above the decision is independent with respect to the history/ accumulated-total-reward. As a result, regarding history the optimal policy is taking action a2 given state s1.
+
+```{r,echo=FALSE}
+cat("a1 expected reward-to-go given s1 :" , 0,"\n" )
+cat("a2 expected reward-to-go given s1 :" ,sum(c(0.75,0.25)*c(20000,-10000)) ,"\n")
+```
+
+However, when $\rho = \operatorname{VaR}$ or $\rho = \operatorname{CVaR}$ we care about the tail distribution of the total discounted reward. As a result,
+
+```{r,echo=FALSE}
+H = data.frame(prob = c(0.88,0.12),reward=c(5000,-5000))
+a = list()
+a[[1]] = data.frame(prob = c(1),reward=c(0))
+a[[2]] = data.frame(prob = c(0.25,0.75),reward=c(-10000,20000))
+d = list()
+```
+
+```{r,echo=FALSE}
+d[[1]] = data.frame(prob = c(sapply(1:2,function(row) H$prob[row] * a[[1]]$prob )),
+           reward = c(sapply(1:2,function(row) H$reward[row] + a[[1]]$reward )) )
+d[[2]] = data.frame(prob = c(sapply(1:2,function(row) H$prob[row] * a[[2]]$prob )),
+           reward = c(sapply(1:2,function(row) H$reward[row] + a[[2]]$reward )) )
+d[[3]] = data.frame(prob = unlist(sapply(1:2,function(row) H$prob[row] * (if(row==1) a[[1]]$prob else a[[2]]$prob) )),
+           reward = unlist(sapply(1:2,function(row) H$reward[row] + (if(row==1) a[[1]]$reward else a[[2]]$reward) )) )
+d[[4]] = data.frame(prob = unlist(sapply(1:2,function(row) H$prob[row] * (if(row==2) a[[1]]$prob else a[[2]]$prob) )),
+           reward = unlist(sapply(1:2,function(row) H$reward[row] + (if(row==2) a[[1]]$reward else a[[2]]$reward) )) )
+```
+
+
+```{r,echo=FALSE}
+cat("",rep("-",81),sep="")
+cat("", format(c("a1","a2","a1|h1 & a2|h2","a2|h1 & a1|h2"), width = 19, justify = "centre"),"",sep="|")
+cat("",rep("-",81),sep="")
+cat("", format(rep(c("prob","reward"),4), width = 9, justify = "centre"),"",sep="|")
+cat("",rep("-",81),sep="")
+cat("", format(str_remove(format(sapply(1:4,function(i) d[[i]][1,] )),"NA"), width = 9, justify = "centre"),"",sep="|")
+cat("", format(str_remove(format(sapply(1:4,function(i) d[[i]][2,] )),"NA"), width = 9, justify = "centre"),"",sep="|")
+cat("", format(str_remove(format(sapply(1:4,function(i) d[[i]][3,] )),"NA"), width = 9, justify = "centre"),"",sep="|")
+cat("", format(str_remove(format(sapply(1:4,function(i) d[[i]][4,] )),"NA"), width = 9, justify = "centre"),"",sep="|")
+cat("",rep("-",81),sep="")
+cat("", format(sapply(1:4,function(i) c("VaR 10%",format(VAR(d[[i]]$reward, theta = 0.1,prob = d[[i]]$prob))) ), width = 9, justify = "centre"),"",sep="|")
+cat("", format(sapply(1:4,function(i) c("CVaR 10%",format(CVAR(d[[i]]$reward, theta = 0.1,prob = d[[i]]$prob))) ), width = 9, justify = "centre"),"",sep="|")
+cat("",rep("-",81),sep="")
+```
+
+
+
+In this simple example, the optimal policy for both VaR and CVaR at $10\%$, is take action a1 if given h1 and take action a2 if given h2 (which is history dependent).
+
