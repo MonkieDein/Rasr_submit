@@ -22,7 +22,7 @@ ui <- fluidPage(
                         choices = list("Uniform" = "runif", "Normal" = "rnorm", "Exp" = "rexp"), 
                         selected = 1),
             # Number of samples Input
-            sliderInput("SampleInput", label = "Samples", min = 1, 
+            numericInput("SampleInput", label = "Samples", min = 1, 
                         max = 10000, value = 100,step = 1),
             # Seed index Input
             numericInput(inputId = "SeedInput",
@@ -44,8 +44,8 @@ ui <- fluidPage(
 # Define server logic required to draw a histogram
 server <- function(input, output) {
     ERM_levels = (0.99^(1:3000))*10000
-    # Plot PDF and risk measures
-    output$distPlot <- renderPlot({
+    
+    compMeasures = reactive({
       set.seed(input$SeedInput)
       X = eval(parse(text=
                        paste0(input$DistInput,"(",input$SampleInput,")") 
@@ -58,30 +58,26 @@ server <- function(input, output) {
       E = mean(X)
       EVaR = EVAR(X,levels = ERM_levels,risk=1-risk)
       
-      df = data.frame(X=X)
+      return(list(X = X, VaR = VaR, CVaR = CVaR,E = E,EVaR = EVaR ))
+    })
+    
+    # Plot PDF and risk measures
+    output$distPlot <- renderPlot({
+      list[X,VaR,CVaR,E,EVaR] = compMeasures()
       # Draw GGplot
-      
       line.data <- data.frame(xintercept = c(VaR, CVaR,EVaR,E), Measure = c("VaR", "CVaR","EVaR","Mean"),
                               stringsAsFactors = FALSE)
-      ggplot(df,aes(x=X,fill = after_stat(x > VaR)))+   theme(legend.position="top")+
+      ggplot(data.frame(X=X),aes(x=X,fill = after_stat(x > VaR))) + 
+        theme(legend.position="top")+
         theme(legend.position="right") +
         geom_histogram(aes(y = ..density..), alpha = 0.4,position = position_dodge(),bins=100)+
         geom_vline(aes(xintercept = xintercept, color = Measure), line.data, size = 1) +
         scale_color_manual(values=c("red", "darkred", "black","blue"))
-
     })
     
     # Output Risk Measure Value
     output$measure <- renderText({
-      set.seed(input$SeedInput)
-      X = eval(parse(text=
-                       paste0(input$DistInput,"(",input$SampleInput,")") 
-      ))      
-      risk = input$RiskInput
-      E = mean(X)
-      VaR = quantile(X,risk,type=1)
-      CVaR = ifelse(abs(risk-0)<(1e-10),min(X),(mean(X*(X<=VaR)) + VaR*(risk - mean(X<=VaR)))/risk)
-      EVaR = EVAR(X,levels = ERM_levels,risk=1-risk)
+      list[X,VaR,CVaR,E,EVaR] = compMeasures()
       
       paste("\nMean :",E,"\nVaR :", VaR,"\nCVaR :",CVaR,"\nEVaR :",EVaR)
     })
