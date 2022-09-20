@@ -74,7 +74,10 @@ ERM = function(X, alpha=0.9, prob = NULL){
 }
 
 EVAR = function(X,levels,risk=0.95, prob=NULL){
-  return(max(sapply(levels, function(z) ERM(X,alpha = z,prob = prob) + log(1-risk)/z )))
+  return(ifelse(abs(risk-1)<1e-10, ifelse(is.null(prob),min(X),min(X[prob>0])),
+    max(sapply(levels, function(z) ERM(X,alpha = z,prob = prob) + log(1-risk)/z ))
+  )
+  )
 }
 
 
