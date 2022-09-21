@@ -18,7 +18,6 @@ line.data <- data.frame(xintercept = c(VaR, CVaR,EVaR,E), Measure = c("VaR", "CV
                         stringsAsFactors = FALSE)
 ggplotly(
 ggplot(data.frame(X=X),aes(x=X,fill = after_stat(x > VaR))) + 
-  theme(legend.position="top")+
   theme(legend.position="right") +
   geom_histogram(aes(y = ..density..), alpha = 0.4,position = position_dodge(),bins=100)+
   geom_vline(aes(xintercept = xintercept, color = Measure), line.data, size = 1) +
