@@ -1,0 +1,124 @@
+---
+title: "Distortion Function and utility function"
+author: "Monkie"
+date: "2022-10-18"
+output: 
+  pdf_document:
+    extra_dependencies: [amsmath,bbm]
+---
+```{r setup, include=FALSE}
+# setwd("~/Desktop/GITHUB/Rasr_submit")
+setwd("C:/GITHUB/Rasr_submit")
+rm(list=ls())
+source("Code/Basic_Utils.R")
+```
+
+# Utility function
+Here we define utility function for a discrete random variable $X$ given risk measure $\rho$ and risk averse parameter $\alpha$ as $U_\rho^\alpha(X)$. Utility function has a property (P1) $\mathbb{E}[U_\rho^\alpha(X)] = \rho_\alpha[X]$. For certain risk measure (eg: $\rho \in \{\mathbb{E},\text{VaR},\text{CVaR},\text{EVaR}\}$), we can write $U_\rho^\alpha(x) = z(x) \cdot x$ where $z$ is a function of $x$.
+
+\begin{enumerate}
+
+\item Expected value utility function
+\[
+U_\mathbb{E}(x) = x = 1 \cdot x
+\]
+Property (P1) follows trivially
+\[
+\mathbb{E}[U_\mathbb{E}(X)] = \mathbb{E}[X]
+\]
+
+
+\item Value at risk utility function
+\[
+U_\text{VaR}^\alpha(x) = 
+\begin{cases}  
+\frac{1}{\mathbb{P}[X = x_\alpha]} \cdot x &, x = x_\alpha\\
+0 &, \text{otherwise}
+\end{cases}
+\]
+where $x_\alpha = \inf\{x \in \mathbb{R} : P(X \leq x) \geq \alpha \} = \text{VaR}_\alpha[X]$ is the $\alpha^\text{th}$ percentile of $X$. 
+Property (P1) follows:
+\[
+\mathbb{E}[U_\text{VaR}^\alpha(x)] = \mathbb{P}[X \neq x_\alpha] * 0  + \mathbb{P}[X = x_\alpha] * \frac{x_\alpha}{ \mathbb{P}[X = x_\alpha]} = x_\alpha = \text{VaR}_\alpha[X]
+\]
+
+\item Conditional Value at risk utility function
+\[
+U_\text{CVaR}^\alpha(x) = 
+\begin{cases}  
+\frac{1}{\alpha} \cdot x &,  x < x_\alpha\\
+\frac{\alpha ~- ~\mathbb{P}[X < x_\alpha]}{\alpha} \cdot x &,  x = x_\alpha\\
+0 &, \text{otherwise}
+\end{cases}
+\]
+Property (P1) Follow:
+\[
+\mathbb{E}[U_\text{CVaR}^\alpha(x)] = \frac{\mathbb{E}[X~ 1_{\{X < x_\alpha\}}]}{\alpha} + x_\alpha \cdot \frac{(\alpha - \mathbb{P}[X < x_\alpha])}{\alpha} = \text{CVaR}_\alpha[X]
+\]
+
+\item Entropic Value at risk utility function
+\[
+U_\text{EVaR}^\alpha(x) = x \cdot \frac{e^{-\beta^\star x}}{\mathbb{E}[e^{-\beta^\star X}]}
+\]
+where $\beta^\star = \text{argmax}_\beta\{ -\beta^{-1} \cdot [\log(\mathbb{E}[e^{-\beta X}])-\log(\alpha)] \}$. Furthermore, let $Z^\star = \frac{e^{-\beta^\star X}}{\mathbb{E}[e^{-\beta^\star X}]}$ we have $\mathbb{E}[Z^\star] = 1$ and $\mathbb{E}[Z^\star \log(Z^\star)] = -\log(\alpha)$. Property (P1) follows from the dual of EVaR:
+\[
+\mathbb{E}[U_\text{EVaR}^\alpha(x)] = \mathbb{E}[X \cdot \frac{ e^{-\beta^\star X}}{\mathbb{E}[e^{-\beta^\star X}]}] = 
+\mathbb{E}[X \cdot Z^\star]
+=\inf_{Z > 0}\{\mathbb{E}[XZ] : \mathbb{E}[Z]=1,\mathbb{E}[Z\log(Z)]\leq -\log(\alpha)\}
+\]
+
+
+\iffalse
+\item Entropic Risk measure utility function
+\[
+U_\text{erm}^\beta(x) = \frac{1-e^{-\beta(x - \text{ERM}_\beta[X])}}{\beta} + \text{ERM}_\beta[X]
+\]
+\fi
+
+\end{enumerate}
+# Distortion function
+Instead of changing the utility of the value in distribution $X$. Distortion function refer to the cumulative distribution of the (dual) robust distorted distribution $Q^\star$. Where $Q^\star$ is defined as
+
+\[
+\rho_\alpha[X] = \mathbb{E}_{Q^\star}[X] = \inf_{Q \in \mathcal{Q}}(~\mathbb{E}_Q[X]~)
+\]
+
+Instead of distorted (cumulative distribution) we first make a connection of utility function with distorted probability mass function (PMF). Here, we connect expected utility and the probability mass function (PMF) of the robust distribution $Q^\star$ with respect to certain risk measure (eg: $\rho \in \{\mathbb{E},\text{VaR},\text{CVaR},\text{EVaR}\}$) where $\rho_\alpha[X] = \mathbb{E}[U_\rho^\alpha(X)] = \mathbb{E}[z(X) \cdot X]$  over random variable $X$.
+
+\[
+\rho_\alpha[X] = \mathbb{E}[U_\rho^\alpha(X)] = \sum_x p(x)\cdot U^\alpha_\rho(X) = \sum_x p(x) \cdot z(x) \cdot x = \sum_x q(x) \cdot x  = \mathbb{E}_{Q^\star}[X]
+\]
+
+Now we are ready to defined the Distortion (cumulative distribution) function $D_\rho^\alpha(~ F^P_X(x) ~) = F^{Q^\star}_X(x)$. Given risk measure $\rho$ and level $\alpha$, the distortion function take in the CDF of the original distribution $P$ of $X$ and output the CDF of the robust distorted distribution $Q^\star$ of $X$ .
+
+\begin{enumerate}
+
+\item Expected value distortion function
+\[
+\text{D}_\mathbb{E}( ~F^P_X(x))~ ) = F^{Q^\star}_X(x) = F^P_X(x)
+\]
+
+\item Value at risk distortion function
+\[
+\text{D}_\text{var}^\alpha( ~F^P_X(x)~) = F^{Q^\star}_X(x) = 
+\begin{cases}  
+0 &, 0 \leq F^P_X(x) < \alpha\\
+1 &, \alpha \leq F^P_X(x) \leq 1
+\end{cases}
+\]
+
+\item Conditional value at risk distortion function
+\[
+\text{D}_\text{cvar}^\alpha(~F^P_X(x)~) = F^{Q^\star}_X(x) = 
+\begin{cases}  
+\frac{F^P_X(x)}{\alpha} &, 0 \leq F^P_X(x) < \alpha\\
+1 &, \alpha \leq F^P_X(x) \leq 1
+\end{cases}
+\]
+
+\item Entropic value at risk distortion function
+\[
+\text{D}_\text{cvar}^\alpha(~F^P_X(x)~) = F^{Q^\star}_X(x) = \sum_{\{\chi \leq x~:~\chi \in X\}} \big( ~p(\chi) \cdot \frac{e^{-\beta^\star \chi}}{\mathbb{E}[e^{-\beta^\star X}]} ~\big) ~
+\]
+\end{enumerate}
+
