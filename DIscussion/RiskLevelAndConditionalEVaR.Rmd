@@ -1,0 +1,126 @@
+---
+title: "Discretize"
+author: "EVaR"
+date: "2022-11-16"
+output: 
+  pdf_document:
+    extra_dependencies: [amsmath,bbm]
+---
+
+```{r}
+setwd("C:/GITHUB/Rasr_submit")
+source("Code/RASR_code.R")
+```
+
+# Entropic Risk Measure
+We define ERM for $beta > 0$ as:
+\[
+\text{ERM}_\beta[X] = -\beta^{-1}{\log(\mathbb{E}[e^{-\beta X}])}
+\]
+, $\text{ERM}_{0}[X] = \mathbb{E}[X]$ and $\text{ERM}_{1}[X] = \min[X]$. Furthermore, it can be written as 
+\[
+\text{ERM}_\beta[X] = \inf_Z\{ \mathbb{E}[ZX] - \frac{\mathbb{E}[Z\log(Z)]}{\beta}: \mathbb{E}[Z \cdot e^{-\beta X}] \leq 1\}
+\]
+\[
+\text{ERM}_\beta[X] = \inf_\alpha\{ \text{EVaR}_\alpha[X] - \frac{\log(\alpha)}{\beta}\}
+\]
+ERM has utility function
+\[
+U_\text{ERM}^\beta(x) = \frac{1-e^{-\beta x}}{\beta}
+\]
+
+# Entropic Value at Risk
+
+Here we define EVaR as 
+\[
+\text{EVaR}_\alpha[X] = \max_\beta\{\text{ERM}_\beta[X] + \log(\alpha) \} 
+\]
+EVaR has utility function
+\[
+U_\text{EVaR}^\alpha(x) = x \cdot \frac{e^{-\beta^\star x}}{\mathbb{E}[e^{-\beta^\star X}]}
+\]
+where $\beta^\star = \text{argmax}_\beta\{ -\beta^{-1} \cdot [\log(\mathbb{E}[e^{-\beta X}])-\log(\alpha)] \}$. Furthermore, let $Z^\star = \frac{e^{-\beta^\star X}}{\mathbb{E}[e^{-\beta^\star X}]}$ we have $\mathbb{E}[Z^\star] = 1$ and $\mathbb{E}[Z^\star \log(Z^\star)] = -\log(\alpha)$. Property (P1) follows from the dual of EVaR:
+\[
+\mathbb{E}[U_\text{EVaR}^\alpha(x)] = \mathbb{E}[X \cdot \frac{ e^{-\beta^\star X}}{\mathbb{E}[e^{-\beta^\star X}]}] = 
+\mathbb{E}[X \cdot Z^\star]
+=\inf_{Z > 0}\{\mathbb{E}[XZ] : \mathbb{E}[Z]=1,\mathbb{E}[Z\log(Z)]\leq -\log(\alpha)\}
+\]
+
+The conditional EVaR can be formulate as 
+\[
+\text{EVaR}_\alpha[X] =\inf_Z\{ \mathbb{E}[Z \cdot \text{EVaR}_{\alpha \cdot \exp(-\mathbb{E}[Z \log(Z)])}[X|S']]\}
+\]
+Proof:
+\[
+\text{EVaR}_\alpha[X] = \sup_\beta\{ \text{ERM}_\beta[X] +\frac{\log(\alpha)}{\beta} \} =  \text{ERM}_{\beta^\star}[X] +\frac{\log(\alpha)}{\beta^\star}
+\]
+\[
+= \text{ERM}_{\beta^\star}[\text{ERM}_{\beta^\star}[X|S']] +\frac{\log(\alpha)}{\beta^\star}
+\]
+\[
+= \text{ERM}_{\beta^\star}[\inf_{\alpha'}\{ \text{EVaR}_{\alpha'}[X|S'] - \frac{\log({\alpha'})}{\beta}\}] +\frac{\log(\alpha)}{\beta^\star}
+\]
+\[
+= \text{ERM}_{\beta^\star}[\inf_{Z_{S'}}\{ \text{EVaR}_{\alpha Z_{S'}}[X|S'] - \frac{\log({\alpha Z_{S'}})}{\beta ^\star}\}] +\frac{\log(\alpha)}{\beta^\star}
+\]
+\[
+= \text{ERM}_{\beta^\star}[\inf_{Z_{S'}}\{ \text{EVaR}_{\alpha Z_{S'}}[X|S'] - \frac{\log({\alpha Z_{S'}})}{\beta ^\star}\}] +\frac{\log(\alpha)}{\beta^\star}
+\]
+\[
+\inf_Z\{ \mathbb{E}[Z \cdot\inf_{Z_{S'}}\{ \text{EVaR}_{\alpha Z_{S'}}[X|S'] - \frac{\log({\alpha Z_{S'}})}{\beta ^\star}\}] - \frac{\mathbb{E}[Z\log(Z)]}{\beta ^\star}: \mathbb{E}[Z \cdot e^{-\beta^\star X}] \leq 1\}
++\frac{\log(\alpha)}{\beta^\star}
+\]
+\[
+\inf_Z\{ \inf_{Z_{S'}}\{\mathbb{E}[Z \cdot \text{EVaR}_{\alpha Z_{S'}}[X|S']] +\frac{-\log({\alpha Z_{S'}})+\log(\alpha)-\mathbb{E}[Z\log(Z)]}{\beta^\star}: \mathbb{E}[Z \cdot e^{-\beta^\star X}] \leq 1\}\}
+\]
+If $-\log({\alpha Z_{S'}})+\log(\alpha)-\mathbb{E}[Z\log(Z)] = 0$ implies $Z_{S'} = e^{-\mathbb{E}[Z \log(Z)]}$
+\[
+=\inf_Z\{ \mathbb{E}[Z \cdot \text{EVaR}_{\alpha \cdot \exp(-\mathbb{E}[Z \log(Z)])}[X|S']]\}
+\]
+\[
+\neq\inf_Z\{ \mathbb{E}[Z \cdot \text{EVaR}_{\alpha \cdot Z}[X|S']]\}
+\]
+# Example
+
+
+
+```{r}
+X1 = data.frame(x = c(1,10),p = c(0.2,0.8))
+X2 = data.frame(x = c(2,10),p = c(0.9,0.1))
+condp = c(0.3,0.7)
+
+Xjoint = data.frame(x = c(1,2,10),p =c(0.06,0.63,0.31))
+
+beta = 0.5
+logZ = -beta*(Xjoint$x - ERM(Xjoint$x,alpha=beta,prob=Xjoint$p))
+Z = exp(logZ)
+Eebx = exp(-beta*ERM(Xjoint$x,alpha=beta,prob=Xjoint$p))
+alpha = exp(-E(X=exp(logZ)*logZ,prob=Xjoint$p))
+soln = sum(Z*Xjoint$x*Xjoint$p)
+soln
+```
+
+
+```{r}
+logZ1 = -beta*(X1$x - ERM(X1$x,alpha=beta,prob=X1$p))
+logZ2 = -beta*(X2$x - ERM(X2$x,alpha=beta,prob=X2$p))
+Z1 = exp(logZ1)
+Z2 = exp(logZ2)
+Eebx1 = exp(-beta*ERM(X1$x,alpha=beta,prob=X1$p))
+Eebx2 = exp(-beta*ERM(X2$x,alpha=beta,prob=X2$p))
+Eebxnew = exp(-beta*ERM(c(ERM(X1$x,alpha=beta,prob=X1$p),ERM(X2$x,alpha=beta,prob=X2$p)),
+                        alpha=beta,
+                        prob=condp))
+alpha1 = exp(-E(X=exp(logZ1)*logZ1,prob=X1$p))
+alpha2 = exp(-E(X=exp(logZ2)*logZ2,prob=X2$p))
+zt1 = alpha1/alpha
+zt2 = alpha2/alpha
+# The wrong solution can be computed as
+cat("wrong method",E(X = c(zt1 * E(Z1*X1$x,prob=X1$p),zt2 * E(Z2*X2$x,prob=X2$p)),prob = condp))
+# The right solution can be computed as 
+library(lamW)
+mixz1 = Eebx1/Eebx
+mixz2 = Eebx2/Eebx
+cat("\nmaybe right method",E(X = c(mixz1 * E(Z1*X1$x,prob=X1$p),mixz2 * E(Z2*X2$x,prob=X2$p)),prob = condp))
+```
+

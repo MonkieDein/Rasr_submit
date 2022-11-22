@@ -68,12 +68,11 @@ where $\beta^\star = \text{argmax}_\beta\{ -\beta^{-1} \cdot [\log(\mathbb{E}[e^
 \]
 
 
-\iffalse
 \item Entropic Risk measure utility function
 \[
 U_\text{erm}^\beta(x) = \frac{1-e^{-\beta(x - \text{ERM}_\beta[X])}}{\beta} + \text{ERM}_\beta[X]
 \]
-\fi
+
 
 \end{enumerate}
 # Distortion function
