@@ -8,8 +8,8 @@ output:
 ---
 
 ```{r,include=FALSE}
-setwd("~/Desktop/GITHUB/Rasr_submit")
-# setwd("C:/GITHUB/Rasr_submit")
+# setwd("~/Desktop/GITHUB/Rasr_submit")
+setwd("C:/GITHUB/Rasr_submit")
 source("Code/RASR_code.R")
 ```
 
@@ -32,17 +32,18 @@ The dual notation for EVaR can be written as
 In this document, we provide an example to dis-prove Theorem 1 and equation (6) from ("EVaR Optimization for Risk-Sensitive
 Reinforcement Learning" by Xinyi Ni)
 \[
-\text{EVaR}_\alpha[X] \neq \inf \{~ \mathbb{E}[\xi_\tau \cdot \text{EVaR}_{\alpha \xi_T}[X | \mathcal{F}_\tau] ] ~ : \mathbb{E}[\xi_\tau] = 1 ,\mathbb{E}[\xi_\tau \log( \xi_\tau )] \leq -\log(1-\alpha)\} 
+\text{EVaR}_\alpha[X] \neq \inf \{~ \mathbb{E}[\xi_\tau \cdot \text{EVaR}_{1- 
+(1-\alpha) \xi_T}[X | \mathcal{F}_\tau] ] ~ : \mathbb{E}[\xi_\tau] = 1 ,\mathbb{E}[\xi_\tau \log( \xi_\tau )] \leq -\log(1-\alpha)\} 
 \]
 
 # Example
 
 Define problem
 ```{r}
-X1 = data.frame(x = c(1,10),p = c(0.2,0.8))
-X2 = data.frame(x = c(2,10),p = c(0.9,0.1))
+X1 = data.frame(x = c(1,10),p = c(0.3,0.7))
+X2 = data.frame(x = c(2,10),p = c(0.8,0.2))
 condp = c(0.2,0.8)
-Xjoint = data.frame(x = c(1,2,10),p =c(0.04,0.72,0.24))
+Xjoint = data.frame(x = c(1,2,10),p =c(0.06,0.64,0.30))
 ```
 
 
@@ -78,28 +79,46 @@ cat("EVaR",alpha,"of X is within [", lb,",", ub ,"]")
 # Disprove Equation
 Above we have computed the EVaR for our example $\text{EVaR}_\alpha[X] = 1.96105138948307$. Now we compute
 \[
-\inf \{~ \mathbb{E}[\xi_\tau \cdot \text{EVaR}_{\alpha \xi_T}[X | \mathcal{F}_\tau] ] ~ : \mathbb{E}[\xi_\tau] = 1 ,\mathbb{E}[\xi_\tau \log( \xi_\tau )] \leq -\log(1-\alpha)\} 
+\inf \{~ \mathbb{E}[\xi_\tau \cdot \text{EVaR}_{1-(1-\alpha) \xi_T}[X | \mathcal{F}_\tau] ] ~ : \mathbb{E}[\xi_\tau] = 1 ,\mathbb{E}[\xi_\tau \log( \xi_\tau )] \leq -\log(1-\alpha)\} 
 \]
 
 We can denote our problem with $|\mathcal{F}_\tau| = 2$ as $\mathbb{E}[\xi_\tau]  = p_1\xi_1 + p_2 \xi_2= 1$, and compute $\xi_2 = \frac{1-p_1 \xi_1}{p_2}$. However, only $\xi_\tau$ pair that satisfy $\mathbb{E}[\xi_\tau \log( \xi_\tau )] = p_1\xi_1\log(\xi_1) + p_2 \xi_2\log(\xi_2)\leq -\log(1-\alpha)$ would be plausible value.
 ```{r}
-A1 = 0.5866321807770045
-Xi1 = A1/alpha
+Xi1 = 0.118/alpha#((1:999)*0.001)/alpha
+A1 = 1-(1-alpha)*Xi1
+# A1 = 0.6482006009142005087398
+# Xi1 = (1-A1)/(1-alpha)
 Xi2 = (1-condp[1]*Xi1)/condp[2]
-A2 = Xi2 * alpha
-(condp[1]*Xi1*log(Xi1) + condp[2]*Xi2*log(Xi2) ) <= -log(1-alpha) 
+A2 = 1-(1-alpha)*Xi2
+filter = which(((condp[1]*Xi1*log(Xi1) + condp[2]*Xi2*log(Xi2) ) <= -log(1-alpha))&((1-alpha)*Xi1 <= 1)&((1-alpha)*Xi2 <= 1)&(A1>0.7))
 ```
 
-Find EVaR alpha for X1
+Find EVaR
 ```{r}
-b1 = 5.386218547069895
-ERMb1 = ERM(X1$x,alpha=b1,prob=X1$p)
-EVaR1 = ERMb1 + log(1-A1)/b1 
-logZ1 = -b1*(X1$x - ERM(X1$x,alpha=b1,prob=X1$p))
-EVaR_ub1 = sum(X1$p*exp(logZ1)*X1$x)
-E(X = c(Xi1*EVaR_ub1,Xi2*2),prob=condp)
-E(X = c(Xi1*EVaR1,Xi2*2),prob=condp)
+E(X = c(Xi1*1,Xi2*2),prob=condp)
 ```
+
+Find beta for A2
+```{r}
+B = 10000*0.99^(1:1000)
+ERMb2 = sapply(B,function(b) ERM(X2$x,alpha=b,prob=X2$p))
+EVaR2 = max(ERMb2 + log(1-A2)/B)
+```
+
+Find beta for A1
+```{r}
+B = 10000*0.99^(1:1000)
+ERMb1 = sapply(B,function(b) ERM(X1$x,alpha=b,prob=X1$p))
+EVaR1 = max(ERMb1 + log(1-A1)/B)
+which.EVaR1 = which.max(ERMb1 + log(1-A1)/B)
+which.EVaR1
+b1 = B[which.EVaR1]
+logZ1 = -b1*(X1$x - ERM(X1$x,alpha=b1,prob=X1$p))
+alp1 = 1-exp(-E(exp(Z1)*logZ1,X1$p))
+EVaR1= E(Z1*X1$x,prob=X1$p)
+```
+
+
 
 ```{r}
 # The wrong solution can be computed as
