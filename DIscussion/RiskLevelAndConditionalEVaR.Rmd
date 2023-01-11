@@ -40,10 +40,10 @@ Reinforcement Learning" by Xinyi Ni)
 
 Define problem
 ```{r}
-X1 = data.frame(x = c(1,10),p = c(0.3,0.7))
-X2 = data.frame(x = c(2,10),p = c(0.8,0.2))
-condp = c(0.2,0.8)
-Xjoint = data.frame(x = c(1,2,10),p =c(0.06,0.64,0.30))
+X1 = data.frame(x = c(1,2,3,4),p = c(0.1,0.2,0.5,0.2))
+X2 = data.frame(x = c(50,60,70,80),p = c(0.5,0.3,0.1,0.1))
+condp = c(0.1,0.9)
+Xjoint = data.frame(x = c(X1$x,X2$x),p = c(X1$p*condp[1],X2$p*condp[2]))
 ```
 
 
@@ -51,7 +51,7 @@ Xjoint = data.frame(x = c(1,2,10),p =c(0.06,0.64,0.30))
 
 To define a parameter we know is true, we set an arbitrary $\beta^\star = 0.5$ for ERM. Furthermore, we define $Z^\star = \frac{e^{-\beta^\star X}}{\mathbb{E}[e^{-\beta^\star X}]}$ and compute the $\alpha = 1 - e^{-\mathbb{E}[Z \log(Z)]}$ for EVaR.
 ```{r}
-beta = 0.5
+beta = 0.0763386691745441
 logZ = -beta*(Xjoint$x - ERM(Xjoint$x,alpha=beta,prob=Xjoint$p))
 alpha = 1 - exp(-E(X=exp(logZ)*logZ,prob=Xjoint$p))
 alpha
@@ -84,18 +84,13 @@ Above we have computed the EVaR for our example $\text{EVaR}_\alpha[X] = 1.96105
 
 We can denote our problem with $|\mathcal{F}_\tau| = 2$ as $\mathbb{E}[\xi_\tau]  = p_1\xi_1 + p_2 \xi_2= 1$, and compute $\xi_2 = \frac{1-p_1 \xi_1}{p_2}$. However, only $\xi_\tau$ pair that satisfy $\mathbb{E}[\xi_\tau \log( \xi_\tau )] = p_1\xi_1\log(\xi_1) + p_2 \xi_2\log(\xi_2)\leq -\log(1-\alpha)$ would be plausible value.
 ```{r}
-Xi1 = 0.118/alpha#((1:999)*0.001)/alpha
+Xi1 = ((1:999)*0.001)/(1-alpha)
 A1 = 1-(1-alpha)*Xi1
 # A1 = 0.6482006009142005087398
 # Xi1 = (1-A1)/(1-alpha)
 Xi2 = (1-condp[1]*Xi1)/condp[2]
 A2 = 1-(1-alpha)*Xi2
-filter = which(((condp[1]*Xi1*log(Xi1) + condp[2]*Xi2*log(Xi2) ) <= -log(1-alpha))&((1-alpha)*Xi1 <= 1)&((1-alpha)*Xi2 <= 1)&(A1>0.7))
-```
-
-Find EVaR
-```{r}
-E(X = c(Xi1*1,Xi2*2),prob=condp)
+filter = which(((condp[1]*Xi1*log(Xi1) + condp[2]*Xi2*log(Xi2) ) <= -log(1-alpha))&((1-alpha)*Xi1 <= 1)&((1-alpha)*Xi2 <= 1))
 ```
 
 Find beta for A2
@@ -114,10 +109,14 @@ which.EVaR1 = which.max(ERMb1 + log(1-A1)/B)
 which.EVaR1
 b1 = B[which.EVaR1]
 logZ1 = -b1*(X1$x - ERM(X1$x,alpha=b1,prob=X1$p))
-alp1 = 1-exp(-E(exp(Z1)*logZ1,X1$p))
-EVaR1= E(Z1*X1$x,prob=X1$p)
+alp1 = 1-exp(-E(exp(logZ1)*logZ1,X1$p))
+EVaR1= E(exp(logZ1)*X1$x,prob=X1$p)
 ```
 
+Find EVaR
+```{r}
+E(X = c(Xi1*EVaR1,Xi2*EVaR2),prob=condp)
+```
 
 
 ```{r}

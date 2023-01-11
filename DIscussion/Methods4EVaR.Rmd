@@ -1,0 +1,78 @@
+---
+title: "ConditionalEVaR"
+author: "Monkie"
+date: "2022-12-22"
+output: pdf_document
+---
+
+Define Library
+```{r,include=FALSE}
+# setwd("~/Desktop/GITHUB/Rasr_submit")
+setwd("C:/GITHUB/Rasr_submit")
+source("Code/RASR_code.R")
+```
+
+Define problem
+```{r}
+X = list()
+X[[1]] = list(stats = list(), df = data.frame(x = c(1,2,3,4),
+                                              p = c(0.1,0.2,0.5,0.2)))
+X[[2]] = list(stats = list(), df = data.frame(x = c(50,60,70,80),
+                                              p = c(0.5,0.3,0.1,0.1)))
+X[[3]] = list(stats = list(), df = data.frame(x = c(1,2,10,50),
+                                              p = c(0.5,0.3,0.1,0.1)))
+X[["n"]] = length(X)
+X[["prob"]] = c(0.1,0.8,0.1)
+```
+
+```{r}
+lambda=0.3
+# EVaR_analysis = function(X,lambda=0.3){
+  
+  joint_prob = data.frame(x = c(sapply(1:X$n,function(i) X[[i]]$df$x)),
+                          p = c(sapply(1:X$n,function(i) X[[i]]$df$p*X[["prob"]][i])))
+  joint = aggregate(joint_prob$p,list(joint_prob$x),FUN = sum)
+  X[["joint"]] = list(stats = list(), df = data.frame(x=joint$Group.1,p=joint$x))
+  # Use optimizer to solve for beta
+  opt = optimize(f = function(b) ERM(X[["joint"]]$df$x,b,X[["joint"]]$df$p)+log(lambda)/b
+                    ,interval = c(1e-10,1e10),tol=1e-15,maximum=TRUE)
+  beta = opt$maximum
+  X[["joint"]]$stats$EVaR = opt$objective
+  
+  X[["joint"]]$df$Z_hat = exp(-beta*X[["joint"]]$df$x)
+  X[["joint"]]$stats$C = sum(X[["joint"]]$df$p * X[["joint"]]$df$Z_hat)
+  X[["joint"]]$df$Z = X[["joint"]]$df$Z_hat / X[["joint"]]$stats$C
+  X[["joint"]]$stats$ERM = ERM(X[["joint"]]$df$x,alpha=beta,prob=X[["joint"]]$df$p)
+  # Method 2 to compute EVaR
+  X[["joint"]]$stats$EVaR2 = sum(X[["joint"]]$df$p*X[["joint"]]$df$Z*X[["joint"]]$df$x)
+
+  
+  # we will required to optimize for beta on the joint distribution
+  for (i in 1:X$n){
+    X[[i]]$df$Z_hat = exp(-beta*X[[i]]$df$x) # exp(-bx)
+    X[[i]]$stats$C = sum(X[[i]]$df$p * X[[i]]$df$Z_hat)
+    X[[i]]$df$Z = X[[i]]$df$Z_hat / X[[i]]$stats$C # exp(-bx)/E[exp(-bx)]
+    
+    X[[i]]$stats$Xi = X[[i]]$stats$C/X[["joint"]]$stats$C
+    X[[i]]$stats$linL = lambda * X[[i]]$stats$Xi
+    X[[i]]$stats$trueL = exp(-sum(X[[i]]$df$p*X[[i]]$df$Z*log(X[[i]]$df$Z)))
+    X[[i]]$stats$ERM = ERM(X[[i]]$df$x,alpha=beta,prob=X[[i]]$df$p)
+    # Method 3 to compute EVaR
+    X[[i]]$stats$TrueEVaR = X[[i]]$stats$ERM + log(X[[i]]$stats$linL)/beta
+    X[[i]]$stats$CondEVaR = X[[i]]$stats$ERM + log(X[[i]]$stats$trueL)/beta
+  }
+  
+  # Method 4 to compute EVaR
+  X[["joint"]]$stats$EVaR4 = sum(X$prob * sapply(1:X$n,function (i) X[[i]]$stats$Xi) *
+                                   sapply(1:X$n,function (i) X[[i]]$stats$CondEVaR))
+
+  X
+# }
+
+
+
+
+
+
+```
+
