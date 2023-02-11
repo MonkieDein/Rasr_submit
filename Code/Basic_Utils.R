@@ -1,5 +1,6 @@
 library(gsubfn)  # need 0.7-0 or later
 library(stringr)
+library(zeallot)
 # TURN single outcome mdp.data.frame into it's respective reward,transition (S,A,S') matrix.
 prep_MDP = function(mdp.df,MDP){
   P <- array(0, c(MDP$lSl,MDP$lAl,MDP$lSl)) # transition prob dim
