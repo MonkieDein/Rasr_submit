@@ -47,7 +47,7 @@ Property (P1) follows:
 U_\text{CVaR}^\alpha(x) = 
 \begin{cases}  
 \frac{1}{\alpha} \cdot x &,  x < x_\alpha\\
-\frac{\alpha ~- ~\mathbb{P}[X < x_\alpha]}{\alpha} \cdot x &,  x = x_\alpha\\
+\frac{\alpha ~- ~\mathbb{P}[X < x_\alpha]}{\alpha \cdot P(x_\alpha)} \cdot x &,  x = x_\alpha\\
 0 &, \text{otherwise}
 \end{cases}
 \]
